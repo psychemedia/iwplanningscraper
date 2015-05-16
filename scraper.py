@@ -1,6 +1,7 @@
 import scraperwiki
 import requests
-from bs4 import BeautifulSoup
+#from bs4 import BeautifulSoup
+import BeautifulSoup
 import re
 
 def dropper(table,drop=False):

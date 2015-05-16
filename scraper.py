@@ -169,7 +169,8 @@ dt="CREATE TABLE IF NOT EXISTS 'IWPLANNING' ('commentsBy' text,'addr' text,'Pari
 scraperwiki.sqlite.execute(dt)
 predata=getCurrApplications()
 data=[]
-grabbed=scraperwiki.sql.select("ref from {}".format(t))
+grabbed=[x['ref'] for x in scraperwiki.sql.select("ref from  {}".format(t))]
+
 print('Grabbed list of {} current items'.format(len(grabbed)))
 for d in predata:
     if d['ref'] not in grabbed:

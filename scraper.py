@@ -158,7 +158,7 @@ def getCurrApplications():
     d['addr']=cells[1].text.strip()
     d['commentsBy']=cells[2].text.strip()
     #d.update(iwPlanPageScrape(d['stub']))
-    d['lat'],d['lon']=OSGB36toWGS84(d['easting'],d['northing'])
+    #d['lat'],d['lon']=OSGB36toWGS84(d['easting'],d['northing'])
     data.append(d)
   return data
 
@@ -173,6 +173,7 @@ print('Grabbed list of {} current items'.format(len(grabbed)))
 for d in predata:
     if d['ref'] not in grabbed:
         d.update(iwPlanPageScrape(d['stub']))
+        d['lat'],d['lon']=OSGB36toWGS84(d['easting'],d['northing'])
         data.append(d)
 print('Grabbing {} unfetched items: {}'.format(len(data),','.join([x['ref'] for x in data])))
 if d != []:

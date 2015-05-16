@@ -168,7 +168,7 @@ dt="CREATE TABLE IF NOT EXISTS 'IWPLANNING' ('commentsBy' text,'addr' text,'Pari
 scraperwiki.sqlite.execute(dt)
 predata=getApplications()
 data=[]
-grabbed=scraperwiki.sql.select("ref from IWPLANNING")
+grabbed=scraperwiki.sql.select("ref from {}".format(t))
 for d in predata:
     if d['ref'] not in grabbed:
         data.append(d)

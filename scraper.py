@@ -134,7 +134,7 @@ def OSGB36toWGS84(E,N):
     #Job's a good'n. 
     return lat, lon
 
-def getApplications():
+def getCurrApplications():
   #Get base page 
   url='https://www.iwight.com/planning/planAppSearch.aspx'
   response =requests.get(url)
@@ -157,7 +157,7 @@ def getApplications():
     d['stub']=cells[0].find('a')['href']
     d['addr']=cells[1].text.strip()
     d['commentsBy']=cells[2].text.strip()
-    d.update(iwPlanPageScrape(d['stub']))
+    #d.update(iwPlanPageScrape(d['stub']))
     d['lat'],d['lon']=OSGB36toWGS84(d['easting'],d['northing'])
     data.append(d)
   return data
@@ -166,12 +166,14 @@ t='IWPLANNING'
 #tablesetup_str(t)
 dt="CREATE TABLE IF NOT EXISTS 'IWPLANNING' ('commentsBy' text,'addr' text,'Parish' text,'Case Officer' text,'Easting/Northing' text,'lon' real,'Publicity Date' text,'stub' text,'Agent or Applicant' text,'Location' text,'easting' real,'lat' real,'Proposal' text,'Comments Date' text,'ref' text,'Ward' text,'northing' real)"
 scraperwiki.sqlite.execute(dt)
-predata=getApplications()
+predata=getCurrApplications()
 data=[]
 grabbed=scraperwiki.sql.select("ref from {}".format(t))
+print('Grabbed list of {} current items'.format(len(grabbed))
 for d in predata:
     if d['ref'] not in grabbed:
+        d.update(iwPlanPageScrape(d['stub']))
         data.append(d)
-
+print('Grabbing {} unfetched items: {}'.format(len(data),','.join([x['ref'] for x in data])))
 if d != []:
     scraperwiki.sqlite.save(unique_keys=['ref'],table_name=t, data=data)

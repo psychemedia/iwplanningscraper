@@ -37,6 +37,7 @@ def planningAppCleaner(t):
     return data
 
 def iwPlanPageScrape(stub):
+    print('Grabbing {}'.format(stub)) 
     urlbase='https://www.iwight.com/planning/'
     url=urlbase+stub
     p=requests.get(url)

@@ -166,5 +166,12 @@ t='IWPLANNING'
 #tablesetup_str(t)
 dt="CREATE TABLE IF NOT EXISTS 'IWPLANNING' ('commentsBy' text,'addr' text,'Parish' text,'Case Officer' text,'Easting/Northing' text,'lon' real,'Publicity Date' text,'stub' text,'Agent or Applicant' text,'Location' text,'easting' real,'lat' real,'Proposal' text,'Comments Date' text,'ref' text,'Ward' text,'northing' real)"
 scraperwiki.sqlite.execute(dt)
-data=getApplications()
-scraperwiki.sqlite.save(unique_keys=['ref'],table_name=t, data=data)
+predata=getApplications()
+data=[]
+grabbed=scraperwiki.sql.select("ref from IWPLANNING")
+for d in predata:
+    if d['ref'] not in grabbed:
+        data.append(d)
+
+if d != []:
+    scraperwiki.sqlite.save(unique_keys=['ref'],table_name=t, data=data)

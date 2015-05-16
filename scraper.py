@@ -169,7 +169,7 @@ scraperwiki.sqlite.execute(dt)
 predata=getCurrApplications()
 data=[]
 grabbed=scraperwiki.sql.select("ref from {}".format(t))
-print('Grabbed list of {} current items'.format(len(grabbed))
+print('Grabbed list of {} current items'.format(len(grabbed)))
 for d in predata:
     if d['ref'] not in grabbed:
         d.update(iwPlanPageScrape(d['stub']))

@@ -2,6 +2,8 @@ import scraperwiki
 import requests
 from bs4 import BeautifulSoup
 import re
+import datetime
+from dateutil import parser
 
 def dropper(table,drop=False):
     """ Helper function to drop a table """
@@ -25,12 +27,25 @@ def tablesetup_str(t,drop=False):
   dt="CREATE TABLE IF NOT EXISTS '{}' ({})".format(t,','.join(deflist))
   return dt
 
+def applicationTrackingTable(p):
+    data={}
+    t=BeautifulSoup(p).find('div',id='pnlTracking').find('table')
+    for row in t.findAll('tr'):
+        cells=row.findAll('td')
+        cn=re.sub('[\r\t\n]','',cells[0].text).strip().strip(':').replace(u'\xa0',' ')
+        data[cn]=cells[1].text.strip()
+        try:
+            data[cn+'_t']=parser.parse(data[cn], dayfirst=True)
+        except: 
+            data[cn+'_t']=None
+    return data
+    
 def planningAppCleaner(t):
     data={}
     for row in t.findAll('tr')[1:]:
         cells=row.findAll('td')
-        key=re.sub('[\r\t\n]','',cells[0].text).strip().strip(':')
-        data[key]=re.sub('[\r\t]','',re.sub('\s\s+',' ',cells[1].text)).strip()
+        key=re.sub('[\r\t\n]','',cells[0].text).strip().strip(':').replace(u'\xa0',' ')
+        data[key]=re.sub('[\r\t]','',re.sub('\s\s+',' ',cells[1].text.replace(u'\xa0',' '))).strip()
     en=data['Easting/Northing'].split('/')
     data['easting']=float(en[0].strip())
     data['northing']=float(en[1].strip())
@@ -43,6 +58,7 @@ def iwPlanPageScrape(stub):
     p=requests.get(url)
     t=BeautifulSoup(p.content.replace('<br/>','\n')).find('table',id='summarydetails')
     data=planningAppCleaner(t)
+    data.update(applicationTrackingTable(p.content))
     return data
     
 
@@ -135,6 +151,7 @@ def OSGB36toWGS84(E,N):
     #Job's a good'n. 
     return lat, lon
 
+    
 def getCurrApplications():
   #Get base page 
   url='https://www.iwight.com/planning/planAppSearch.aspx'
@@ -157,7 +174,14 @@ def getCurrApplications():
     d['ref']=cells[0].find('a').text.strip()
     d['stub']=cells[0].find('a')['href']
     d['addr']=cells[1].text.strip()
-    d['commentsBy']=cells[2].text.strip()
+    d['desc']=cells[2].text.strip()
+    d['commentsBy']=cells[3].text.strip()
+    d['commentsByDate']=d['commentsBy'].replace('Comments Due By:','').strip()
+    try:
+        d['commentsByDate']=parser.parse(d['commentsByDate'], dayfirst=True)
+    except:
+        d['commentsByDate']=None
+    d['scrapetime']=datetime.datetime.utcnow()
     #d.update(iwPlanPageScrape(d['stub']))
     #d['lat'],d['lon']=OSGB36toWGS84(d['easting'],d['northing'])
     data.append(d)

@@ -155,7 +155,12 @@ def OSGB36toWGS84(E,N):
 def getCurrApplications():
   #Get base page 
   url='https://www.iwight.com/planning/planAppSearch.aspx'
-  response =requests.get(url)
+  session = requests.Session()
+  headers={'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36'}
+  session.headers.update(headers)
+
+
+  response =session.get(url)
   soup=BeautifulSoup(response.content)
   viewstate = soup.find('input' , id ='__VIEWSTATE')['value']
   eventvalidation=soup.find('input' , id ='__EVENTVALIDATION')['value']
@@ -164,7 +169,10 @@ def getCurrApplications():
         '__VIEWSTATEGENERATOR':viewstategenerator,
         '__EVENTVALIDATION':eventvalidation,'q':'Search the site...'}
   #Get all current applications 
-  r=requests.post(url,data=params)
+  headers['Referer'] = response.request.url
+  headers['Origin']= 'https://www.iow.gov.uk'
+  headers['Host']= 'www.iow.gov.uk'
+  r=session.post(url,headers=headers,data=params)
   soup=BeautifulSoup(r.content)
   t=soup.find('table',id='dgResults')
   data=[]
